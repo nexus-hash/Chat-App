@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "811144216901",
+    "project_id": "chatwithme-be30b",
+    "storage_bucket": "chatwithme-be30b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811144216901:android:0784dc5f8f5f156942fe2c",
+        "android_client_info": {
+          "package_name": "com.example.messaging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811144216901-fcveh34ecojvvmn4r162o45kd8mhplft.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.messaging",
+            "certificate_hash": "1c91e3dd47543b3f1b50f59aac7fe758f17d6cd0"
+          }
+        },
+        {
+          "client_id": "811144216901-nkosr29nclnir0g64q9nkt7f1jeop6fg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9uY83C2b5nEJH72_r92rfuTn6kUA3pKk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "811144216901-nkosr29nclnir0g64q9nkt7f1jeop6fg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
