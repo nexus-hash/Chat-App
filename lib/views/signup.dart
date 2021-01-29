@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/views/homepage.dart';
+import 'package:messaging/services/database.dart';
 
 class SignUp extends StatefulWidget {
   final Function toggle;
@@ -18,6 +19,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
   bool isLoading = false;
 
   AuthMethods authMethods = new AuthMethods();
+  DatabaseMethods databaseMethods = new DatabaseMethods();
 
   final formkey = GlobalKey<FormState>();
   TextEditingController _nameEditingController = new TextEditingController();
@@ -38,6 +40,12 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
           .then((value) {
         print("$value");
       });
+
+      Map<String, String> userMap = {
+        "name":_nameEditingController.text,
+        "email":_emailEditingController.text
+      };
+      databaseMethods.uploadUserInfo(userMap);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
         return HomePage();
       }));

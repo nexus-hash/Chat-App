@@ -3,6 +3,7 @@ import 'package:messaging/colors/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/helper/authenticate.dart';
 import 'package:messaging/services/auth.dart';
+import 'package:messaging/views/search.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -137,7 +138,12 @@ class _HomePageState extends State<HomePage> {
                             Icons.search,
                             color: Colors.white,
                           ),
-                          onPressed: () {})
+                          onPressed: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return Search();
+                            }));
+                          })
                     ],
                   ),
                 ),
