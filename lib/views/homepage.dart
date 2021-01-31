@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   AppColors color = AppColors();
   GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey();
   AuthMethods authMethods = new AuthMethods();
+  
 
   @override
   void initState() {

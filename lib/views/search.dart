@@ -37,7 +37,7 @@ class _SearchState extends State<Search> {
       };
       databaseMethods.createChatRoom(chatRoomId, chatRoomMap);
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return ChatScreen();
+        return ChatScreen(secondUser: username,chatRoomId: chatRoomId);
       }));
     } else {
       print("Hello you want to message yourself!!!");

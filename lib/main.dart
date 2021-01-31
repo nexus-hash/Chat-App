@@ -3,30 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:messaging/helper/authenticate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/views/homepage.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final AppColors color = new AppColors();
-  // This widget is the root of your application.
+
   final FirebaseAuth auth = FirebaseAuth.instance;
-  //Widget getUser() {
-    //try {
-      //auth.onAuthStateChanged.listen((user) {
-        //if (user == null) {
-          //return Authenticate();
-        //} else {
-          //return HomePage();
-        //}
-      //});
-    //} catch (k) {
-      //print(k);
-    //}
-    //return Authenticate();
-  //}
+
+  bool isUserLoggedIn = false;
+  @override
+  void initState() {
+    getLoggedInState();
+    super.initState();
+  }
+
+  getLoggedInState() async {
+    await HelperFunctions.getUserLoggedInSharedPreference().then((value) => {
+          setState(() {
+            isUserLoggedIn = value;
+          })
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +44,7 @@ class MyApp extends StatelessWidget {
         theme: new ThemeData(
             backgroundColor: color.background, canvasColor: color.background),
         debugShowCheckedModeBanner: false,
-        home: Authenticate(),
+        home: isUserLoggedIn ? HomePage() : Authenticate(),
       ),
     );
   }
