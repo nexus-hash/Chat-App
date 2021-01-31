@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/helper/authenticate.dart';
+import 'package:messaging/helper/constants.dart';
+import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/views/search.dart';
 
@@ -14,6 +16,27 @@ class _HomePageState extends State<HomePage> {
   AppColors color = AppColors();
   GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey();
   AuthMethods authMethods = new AuthMethods();
+
+  @override
+  void initState() {
+    getUserInfo();
+    super.initState();
+  }
+
+  getUserInfo() async {
+    Constants.myName = await HelperFunctions.getUserNameSharedPreference();
+  }
+
+  signMeOut() {
+    try {
+      authMethods.signout();
+      HelperFunctions.saveUserLoggedInSharedPreference(false);
+      HelperFunctions.saveUserEmailSharedPreference(null);
+      HelperFunctions.saveUserNameSharedPreference(null);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ListTile(
                     onTap: () {
-                      authMethods.signout();
+                      signMeOut();
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return Authenticate();

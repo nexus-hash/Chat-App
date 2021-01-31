@@ -1,11 +1,14 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/colors/color.dart';
+import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
+import 'package:messaging/services/database.dart';
 import 'package:messaging/views/forgotpassword.dart';
-import 'package:messaging/views/homepage.dart'; 
+import 'package:messaging/views/homepage.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggle;
@@ -23,23 +26,42 @@ class _SignInState extends State<SignIn> {
       new TextEditingController();
   double ratio = 1.sh / 1.sw;
   bool selected = true;
+  QuerySnapshot snapshotUserInfo;
   static AppColors color = new AppColors();
   AuthMethods authMethods = new AuthMethods();
+  DatabaseMethods databaseMethods = new DatabaseMethods();
 
   signMeIn() {
     if (formkey.currentState.validate()) {
+      HelperFunctions.saveUserEmailSharedPreference(
+          _emailEditingController.text);
+      
+
       setState(() {
         isLoading = true;
       });
+
+
+      databaseMethods
+              .getUserByUserEmail(_emailEditingController.text)
+              .then((val) {
+            snapshotUserInfo = val;
+            HelperFunctions.saveUserNameSharedPreference(snapshotUserInfo.documents[0].data["name"]);
+          });
+
       authMethods
           .signInWithEmailAndPassword(
               _emailEditingController.text, _passwordEditingController.text)
           .then((value) {
-        print("$value");
+        if (value != null) {
+          
+          HelperFunctions.saveUserLoggedInSharedPreference(true);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) {
+            return HomePage();
+          }));
+        }
       });
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return HomePage();
-      }));
     }
   }
 
@@ -155,7 +177,7 @@ class _SignInState extends State<SignIn> {
                   ),
                   FlatButton(
                     onPressed: () {
-                      signMeIn(); 
+                      signMeIn();
                     },
                     child: Container(
                       height: 60.h,

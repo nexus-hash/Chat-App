@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/colors/color.dart';
+import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/views/homepage.dart';
 import 'package:messaging/services/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUp extends StatefulWidget {
   final Function toggle;
@@ -28,8 +30,37 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
   TextEditingController _emailEditingController = new TextEditingController();
   double ratio = 1.sh / 1.sw;
   AppColors color = new AppColors();
+  QuerySnapshot s;
+  bool checkUsers = false;
+
+  Future<void> initiateUser(String x) async {
+    databaseMethods.getUserByUsername(x).then((val) {
+      setState(() {
+        s = val;
+      });
+    });
+  }
+
+  Future<void> checkUser(String x) async {
+    await initiateUser(x);
+    if (s.documents.length == 0) {
+      checkUsers = false;
+    } else {
+      checkUsers = true;
+    }
+  }
+
   signMeUp() {
     if (formkey.currentState.validate()) {
+      Map<String, String> userMap = {
+        "name": _nameEditingController.text,
+        "email": _emailEditingController.text
+      };
+
+      HelperFunctions.saveUserEmailSharedPreference(
+          _emailEditingController.text);
+      HelperFunctions.saveUserNameSharedPreference(_nameEditingController.text);
+
       setState(() {
         isLoading = true;
       });
@@ -41,11 +72,9 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
         print("$value");
       });
 
-      Map<String, String> userMap = {
-        "name":_nameEditingController.text,
-        "email":_emailEditingController.text
-      };
       databaseMethods.uploadUserInfo(userMap);
+      HelperFunctions.saveUserLoggedInSharedPreference(true);
+
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
         return HomePage();
       }));
@@ -88,7 +117,9 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
                                     ? "You can't ignore me!!!"
                                     : val.length < 4
                                         ? "This is too short"
-                                        : null;
+                                        : checkUsers
+                                            ? "Username Already in use"
+                                            : null;
                               },
                               controller: _nameEditingController,
                               style: TextStyle(color: Color(0xff7f7f8e)),
@@ -180,7 +211,8 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
                     height: 20.h,
                   ),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      await checkUser(_nameEditingController.text);
                       signMeUp();
                     },
                     child: Container(
