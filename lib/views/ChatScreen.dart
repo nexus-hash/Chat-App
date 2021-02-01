@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,16 +24,19 @@ class _ChatScreenState extends State<ChatScreen> {
       stream: chatMessageStream,
       builder: (context, snapshot) {
         return snapshot.hasData
-            ? Container()
-            : ListView.builder(
+            ? ListView.builder(
                 itemCount: snapshot.data.documents.length,
+                scrollDirection: Axis.vertical,
+                physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   return MessageTiles(
                     message: snapshot.data.documents[index].data["Message"],
-                    isSendByMe: snapshot.data.documents[index].data["sendby"]== Constants.myName,
+                    isSendByMe: snapshot.data.documents[index].data["sendby"] ==
+                        Constants.myName,
                   );
                 },
-              );
+              )
+            : Container();
       },
     );
   }
@@ -47,6 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
         "time": DateTime.now()
       };
       databaseMethods.addConversationMessages(widget.chatRoomId, messageMap);
+      _messageTextEditingController.text = "";
     }
   }
 
@@ -119,7 +122,9 @@ class _ChatScreenState extends State<ChatScreen> {
         body: Container(
           child: Stack(
             children: <Widget>[
-              chatMessageList(),
+              Container(
+                padding: EdgeInsets.only(top: 10.h,bottom: 60.h),
+                child: chatMessageList()),
               Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
@@ -159,6 +164,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ),
+        resizeToAvoidBottomInset: true,
       ),
     );
   }
@@ -167,17 +173,36 @@ class _ChatScreenState extends State<ChatScreen> {
 class MessageTiles extends StatelessWidget {
   final String message;
   final bool isSendByMe;
-  MessageTiles({this.message,this.isSendByMe});
+  MessageTiles({this.message, this.isSendByMe});
+  final double width = 1.sw;
+  final double height = 1.sh;
+  final AppColors color = new AppColors();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1.sw,
-      alignment: isSendByMe? Alignment.centerLeft:Alignment.centerRight ,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        width: 1.sw,
+        child: Container(
+          alignment: isSendByMe ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-        child: Text(
-          message,
-          style: TextStyle(color: Colors.white),
+            padding: EdgeInsets.symmetric(horizontal: width*.07,vertical: height*.02),
+            decoration: BoxDecoration(gradient: LinearGradient(colors: isSendByMe ? [
+              color.gradient1,
+              color.gradient2
+            ]:[
+              Color(0x1AFFFFFF),
+              Color(0x1AFFFFFA)
+            ]),
+            borderRadius: isSendByMe? BorderRadius.only(topLeft: Radius.circular(50.0),bottomLeft: Radius.circular(50.0),topRight: Radius.circular(50.0)):
+            BorderRadius.only(topLeft: Radius.circular(50.0),topRight: Radius.circular(50.0),bottomRight: Radius.circular(50.0))
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ),
       ),
     );
