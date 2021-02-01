@@ -24,12 +24,17 @@ class _ChatScreenState extends State<ChatScreen> {
     return StreamBuilder(
       stream: chatMessageStream,
       builder: (context, snapshot) {
-        return snapshot.hasData? Container() :ListView.builder(
-          itemCount: snapshot.data.documents.length,
-          itemBuilder: (context, index) {
-            return MessageTiles(message: snapshot.data.documents[index].data["Message"],);
-          },
-        );
+        return snapshot.hasData
+            ? Container()
+            : ListView.builder(
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (context, index) {
+                  return MessageTiles(
+                    message: snapshot.data.documents[index].data["Message"],
+                    isSendByMe: snapshot.data.documents[index].data["sendby"]== Constants.myName,
+                  );
+                },
+              );
       },
     );
   }
@@ -161,12 +166,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
 class MessageTiles extends StatelessWidget {
   final String message;
-  MessageTiles({this.message});
+  final bool isSendByMe;
+  MessageTiles({this.message,this.isSendByMe});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text(message,style: TextStyle(color: Colors.white),),
+      width: 1.sw,
+      alignment: isSendByMe? Alignment.centerLeft:Alignment.centerRight ,
+          child: Container(
+        child: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
     );
   }
 }
