@@ -36,7 +36,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 },
               )
-            : Container();
+            : Container(
+                child: Center(
+                    child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(color.gradient1),
+                )),
+              );
       },
     );
   }
@@ -123,8 +128,8 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Stack(
             children: <Widget>[
               Container(
-                padding: EdgeInsets.only(top: 10.h,bottom: 60.h),
-                child: chatMessageList()),
+                  padding: EdgeInsets.only(top: 10.h, bottom: 60.h),
+                  child: chatMessageList()),
               Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
@@ -187,17 +192,22 @@ class MessageTiles extends StatelessWidget {
         child: Container(
           alignment: isSendByMe ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: width*.07,vertical: height*.02),
-            decoration: BoxDecoration(gradient: LinearGradient(colors: isSendByMe ? [
-              color.gradient1,
-              color.gradient2
-            ]:[
-              Color(0x1AFFFFFF),
-              Color(0x1AFFFFFA)
-            ]),
-            borderRadius: isSendByMe? BorderRadius.only(topLeft: Radius.circular(50.0),bottomLeft: Radius.circular(50.0),topRight: Radius.circular(50.0)):
-            BorderRadius.only(topLeft: Radius.circular(50.0),topRight: Radius.circular(50.0),bottomRight: Radius.circular(50.0))
-            ),
+            padding: EdgeInsets.symmetric(
+                horizontal: width * .07, vertical: height * .02),
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: isSendByMe
+                        ? [color.gradient1, color.gradient2]
+                        : [Color(0x1AFFFFFF), Color(0x1AFFFFFA)]),
+                borderRadius: isSendByMe
+                    ? BorderRadius.only(
+                        topLeft: Radius.circular(50.0),
+                        bottomLeft: Radius.circular(50.0),
+                        topRight: Radius.circular(50.0))
+                    : BorderRadius.only(
+                        topLeft: Radius.circular(50.0),
+                        topRight: Radius.circular(50.0),
+                        bottomRight: Radius.circular(50.0))),
             child: Text(
               message,
               style: TextStyle(color: Colors.white),

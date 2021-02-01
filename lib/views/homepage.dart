@@ -6,6 +6,7 @@ import 'package:messaging/helper/constants.dart';
 import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/services/database.dart';
+import 'package:messaging/views/ChatScreen.dart';
 import 'package:messaging/views/search.dart';
 
 class HomePage extends StatefulWidget {
@@ -52,11 +53,22 @@ class _HomePageState extends State<HomePage> {
       stream: chatRoomsStream,
       builder: (context, snapshot) {
         return snapshot.hasData
-            ? ListView.builder(
+            ? ListView.separated(
+                scrollDirection: Axis.vertical,
+                physics: BouncingScrollPhysics(),
+                shrinkWrap: true,
                 itemCount: snapshot.data.documents.length,
                 itemBuilder: (context, index) {
                   return ChatRoomsTile(
                     userName: snapshot.data.documents[index].data["users"],
+                    chatRoomId:
+                        snapshot.data.documents[index].data["chatroomid"],
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return Divider(
+                    height: 1,
+                    color: Colors.grey,
                   );
                 },
               )
@@ -197,6 +209,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: new Size(1.sw, 65.h),
       ),
       body: Container(
+        padding: EdgeInsets.only(top: .02.sh),
         child: chatRoomList(),
       ),
     ));
@@ -205,21 +218,59 @@ class _HomePageState extends State<HomePage> {
 
 class ChatRoomsTile extends StatelessWidget {
   final List<dynamic> userName;
-  ChatRoomsTile({this.userName});
+  final String chatRoomId;
+  ChatRoomsTile({this.userName, this.chatRoomId});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Container(
-            child: Text(
-              userName[0]==Constants.myName?
-              userName[1]:userName[0],
-              style: TextStyle(color: Colors.white),
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return ChatScreen(
+            secondUser:
+                userName[0] != Constants.myName ? userName[0] : userName[1],
+            chatRoomId: chatRoomId,
+          );
+        }));
+      },
+      child: Container(
+        height: .12.sh,
+        padding: EdgeInsets.only(left: .01.sw),
+        child: Row(
+          children: <Widget>[
+            Container(
+                height: 65.r,
+                width: 65.r,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(65.r))),
+            SizedBox(
+              width: .03.sw,
             ),
-          )
-        ],
+            Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        userName[0] == Constants.myName
+                            ? userName[1]
+                            : userName[0],
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17.ssp),
+                      )),
+                  Container(
+                    child: Text(
+                      "Message demo",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ])
+          ],
+        ),
       ),
     );
   }
