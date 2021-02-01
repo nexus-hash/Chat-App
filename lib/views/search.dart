@@ -37,7 +37,7 @@ class _SearchState extends State<Search> {
       };
       databaseMethods.createChatRoom(chatRoomId, chatRoomMap);
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return ChatScreen(secondUser: username,chatRoomId: chatRoomId);
+        return ChatScreen(secondUser: username, chatRoomId: chatRoomId);
       }));
     } else {
       print("Hello you want to message yourself!!!");
@@ -200,10 +200,19 @@ class _SearchState extends State<Search> {
   }
 }
 
-getChatRoomId(String t, String u) {
-  if (t.substring(0, 1).codeUnitAt(0) > u.substring(0, 1).codeUnitAt(0)) {
-    return "$u\_$t";
+getChatRoomId(String a, String b) {
+  if (a.length != b.length) {
+    if (a.length > b.length) {
+      return "$a\_$b";
+    } else {
+      return "$b\_$a";
+    }
   } else {
-    return "$t\_$u";
+    for (int i = 0; i < a.length; i++) {
+      if (a.codeUnitAt(i) > b.codeUnitAt(i)) {
+        return "$a\_$b";
+      }
+    }
+    return ("$b\_$a");
   }
 }

@@ -19,8 +19,8 @@ class _MyAppState extends State<MyApp> {
   final AppColors color = new AppColors();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
-
   bool isUserLoggedIn = false;
+
   @override
   void initState() {
     getLoggedInState();
@@ -39,7 +39,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: Size(392.72, 738.18),
-      allowFontScaling: true,
+      allowFontScaling: false,
       child: MaterialApp(
         theme: new ThemeData(
             backgroundColor: color.background, canvasColor: color.background),
