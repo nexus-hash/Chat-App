@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,6 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   TextEditingController _messageTextEditingController =
       new TextEditingController();
+  ScrollController _controller = ScrollController();
   Stream chatMessageStream;
 
   Widget chatMessageList() {
@@ -26,6 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
         return snapshot.hasData
             ? ListView.builder(
                 itemCount: snapshot.data.documents.length,
+                controller: _controller,
                 scrollDirection: Axis.vertical,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
@@ -55,6 +59,9 @@ class _ChatScreenState extends State<ChatScreen> {
       };
       databaseMethods.addConversationMessages(widget.chatRoomId, messageMap);
       _messageTextEditingController.text = "";
+      Timer(Duration(milliseconds: 300), () {
+        _controller.jumpTo(_controller.position.maxScrollExtent);
+      });
     }
   }
 
@@ -162,6 +169,10 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                             onPressed: () {
                               sendMessage();
+                              Timer(Duration(milliseconds: 300), () {
+                                _controller.jumpTo(
+                                    _controller.position.maxScrollExtent);
+                              });
                             })
                       ],
                     ),
@@ -172,6 +183,12 @@ class _ChatScreenState extends State<ChatScreen> {
         resizeToAvoidBottomInset: true,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 
@@ -192,8 +209,9 @@ class MessageTiles extends StatelessWidget {
         child: Container(
           alignment: isSendByMe ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
+            constraints: BoxConstraints(maxWidth: .7.sw),
             padding: EdgeInsets.symmetric(
-                horizontal: width * .07, vertical: height * .02),
+                horizontal: width * .04, vertical: height * .02),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                     colors: isSendByMe
