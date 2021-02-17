@@ -1,17 +1,15 @@
-# messaging
+# A Communication App
 
-A new Flutter application.
+>Made Just to practice flutter. This app features user to user messaging 
+ only with the use of your EmailID.
 
-## Getting Started
+### Features
 
-This project is a starting point for a Flutter application.
+* You can message you friends, share photos, videos.
+* This app supports one to one and group voice calling. **_Under Testing Not Avialable in the Repo Yet._**
+* And only one to one video calling for now. **_Under Testing Not Avialable in the Repo Yet._**
 
-A few resources to get you started if this is your first Flutter project:
+### Future Plans
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# Chat App
+Add more features including:
+* Group Video Calling 
