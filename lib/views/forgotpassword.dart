@@ -42,9 +42,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              height: 20.h,
-            ),
+            Spacer(),
+                  Container(
+                    height: 0.09.sh,
+                    width: 0.5.sw,
+                    
+                  child: Image.asset("assets/images/Gibber.png",fit: BoxFit.fill,)),
+                  Spacer(),
+                  Text("Forgot Password",style: TextStyle(color: Color(0xff7f7f8e),fontSize: 20),),
+                  SizedBox(height: 15.0,),
             Form(
               key: formkey,
                           child: Container(

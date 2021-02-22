@@ -34,26 +34,25 @@ class _SignInState extends State<SignIn> {
 
   signMeIn() {
     if (formkey.currentState.validate()) {
+      Fluttertoast.showToast(
+          msg: "Loging In...",
+          backgroundColor: Colors.purple,
+          textColor: Colors.white);
+      HelperFunctions.saveUserEmailSharedPreference(
+          _emailEditingController.text);
+
+      setState(() {
+        isLoading = true;
+      });
+
+      databaseMethods
+          .getUserByUserEmail(_emailEditingController.text)
+          .then((val) {
+        snapshotUserInfo = val;
+        HelperFunctions.saveUserNameSharedPreference(
+            snapshotUserInfo.documents[0].data["name"]);
+      });
       try {
-        Fluttertoast.showToast(
-            msg: "Loging In...",
-            backgroundColor: Colors.purple,
-            textColor: Colors.white);
-        HelperFunctions.saveUserEmailSharedPreference(
-            _emailEditingController.text);
-
-        setState(() {
-          isLoading = true;
-        });
-
-        databaseMethods
-            .getUserByUserEmail(_emailEditingController.text)
-            .then((val) {
-          snapshotUserInfo = val;
-          HelperFunctions.saveUserNameSharedPreference(
-              snapshotUserInfo.documents[0].data["name"]);
-        });
-
         authMethods
             .signInWithEmailAndPassword(
                 _emailEditingController.text, _passwordEditingController.text)
@@ -70,13 +69,9 @@ class _SignInState extends State<SignIn> {
               return HomePage();
             }));
           }
-        }).catchError((e) {
-          print(e.code);
-          setState(() {
-            isLoading = false;
-          });
         });
-      } catch (e) {
+      } on PlatformException catch (e) {
+        print(e);
         setState(() {
           isLoading = false;
         });
@@ -99,9 +94,15 @@ class _SignInState extends State<SignIn> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: 20.h,
-                  ),
+                  Spacer(),
+                  Container(
+                    height: 0.09.sh,
+                    width: 0.5.sw,
+                    
+                  child: Image.asset("assets/images/Gibber.png",fit: BoxFit.fill,)),
+                  Spacer(),
+                  Text("Sign In",style: TextStyle(color: Color(0xff7f7f8e),fontSize: 20),),
+                  SizedBox(height: 15.0,),
                   Form(
                     key: formkey,
                     child: Column(
