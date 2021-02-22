@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:messaging/services/auth.dart';
 
 class DatabaseMethods {
+  AuthMethods _authMethods = new AuthMethods();
+
   getUserByUsername(String username) async {
     return await Firestore.instance
         .collection("users")
@@ -54,5 +60,12 @@ class DatabaseMethods {
         .collection("ChatRoom")
         .where("users", arrayContains: userName)
         .snapshots();
+  }
+
+  uploadImage(
+      {@required File image,
+      @required String sendby,
+      @required String chatRoomId}) {
+    _authMethods.uploadImage(image, sendby, chatRoomId);
   }
 }

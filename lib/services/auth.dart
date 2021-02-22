@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:messaging/model/user.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  StorageReference _storageReference;
 
   User _userFromFirebaseUser(FirebaseUser user) {
     return user != null ? User(userID: user.uid) : null;
@@ -44,5 +48,28 @@ class AuthMethods {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  Future<String> uploadImageToStorage(File image) async {
+    try {
+      _storageReference = FirebaseStorage.instance
+          .ref()
+          .child('${DateTime.now().millisecondsSinceEpoch}');
+      StorageUploadTask _storageUploadTask = _storageReference.putFile(image);
+      var url =
+          await (await _storageUploadTask.onComplete).ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  void setImagemsg(String url, String sendby, String chatRoomId) {
+    
+  }
+  void uploadImage(File image, String sendby, String chatRoomId) async {
+    String url = await uploadImageToStorage(image);
+    setImagemsg(url, sendby, chatRoomId);
   }
 }

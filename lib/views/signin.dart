@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
@@ -32,35 +34,53 @@ class _SignInState extends State<SignIn> {
 
   signMeIn() {
     if (formkey.currentState.validate()) {
-      HelperFunctions.saveUserEmailSharedPreference(
-          _emailEditingController.text);
-      
+      try {
+        Fluttertoast.showToast(
+            msg: "Loging In...",
+            backgroundColor: Colors.purple,
+            textColor: Colors.white);
+        HelperFunctions.saveUserEmailSharedPreference(
+            _emailEditingController.text);
 
-      setState(() {
-        isLoading = true;
-      });
+        setState(() {
+          isLoading = true;
+        });
 
+        databaseMethods
+            .getUserByUserEmail(_emailEditingController.text)
+            .then((val) {
+          snapshotUserInfo = val;
+          HelperFunctions.saveUserNameSharedPreference(
+              snapshotUserInfo.documents[0].data["name"]);
+        });
 
-      databaseMethods
-              .getUserByUserEmail(_emailEditingController.text)
-              .then((val) {
-            snapshotUserInfo = val;
-            HelperFunctions.saveUserNameSharedPreference(snapshotUserInfo.documents[0].data["name"]);
+        authMethods
+            .signInWithEmailAndPassword(
+                _emailEditingController.text, _passwordEditingController.text)
+            .then((value) {
+          if (value != null) {
+            print(value);
+            Fluttertoast.showToast(
+                msg: "Loging In Sucessful",
+                backgroundColor: Colors.purple,
+                textColor: Colors.white);
+            HelperFunctions.saveUserLoggedInSharedPreference(true);
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) {
+              return HomePage();
+            }));
+          }
+        }).catchError((e) {
+          print(e.code);
+          setState(() {
+            isLoading = false;
           });
-
-      authMethods
-          .signInWithEmailAndPassword(
-              _emailEditingController.text, _passwordEditingController.text)
-          .then((value) {
-        if (value != null) {
-          
-          HelperFunctions.saveUserLoggedInSharedPreference(true);
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) {
-            return HomePage();
-          }));
-        }
-      });
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 

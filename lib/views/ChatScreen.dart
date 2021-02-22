@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:messaging/helper/Utils.dart';
 import 'package:messaging/helper/constants.dart';
 import 'package:messaging/services/database.dart';
+import 'package:messaging/views/CallScreen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String secondUser, chatRoomId;
@@ -19,17 +23,41 @@ class _ChatScreenState extends State<ChatScreen> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   TextEditingController _messageTextEditingController =
       new TextEditingController();
-  ScrollController _controller = ScrollController();
+  ScrollController _listcontroller = ScrollController();
   Stream chatMessageStream;
+
+  bool isWritting = false;
+
+  pickImage({@required ImageSource source}) async {
+    File selectedImage = await Utils.pickingImage(source: source);
+    databaseMethods.uploadImage(
+      image: selectedImage,
+      chatRoomId: widget.chatRoomId,
+      sendby: Constants.myName
+    );
+  }
+
+  setWriting(val) {
+    setState(() {
+      isWritting = val;
+    });
+  }
 
   Widget chatMessageList() {
     return StreamBuilder(
       stream: chatMessageStream,
       builder: (context, snapshot) {
+        // SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        //   _listcontroller.animateTo(
+        //     _listcontroller.position.minScrollExtent,
+        //     duration: Duration(milliseconds: 250),
+        //     curve: Curves.easeInOut
+        //   );
+        // });
         return snapshot.hasData
             ? ListView.builder(
                 itemCount: snapshot.data.documents.length,
-                controller: _controller,
+                controller: _listcontroller,
                 scrollDirection: Axis.vertical,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
@@ -60,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
       databaseMethods.addConversationMessages(widget.chatRoomId, messageMap);
       _messageTextEditingController.text = "";
       Timer(Duration(milliseconds: 300), () {
-        _controller.jumpTo(_controller.position.maxScrollExtent);
+        _listcontroller.jumpTo(_listcontroller.position.maxScrollExtent);
       });
     }
   }
@@ -125,6 +153,25 @@ class _ChatScreenState extends State<ChatScreen> {
                           ]),
                     ),
                   ),
+                  Spacer(),
+                  IconButton(
+                    icon: Icon(
+                      Icons.video_call,
+                      color: Colors.white,
+                    ),
+                    onPressed: null,
+                  ),
+                  IconButton(
+                      icon: Icon(
+                        Icons.call,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return CallScreen();
+                        }));
+                      })
                 ],
               ),
             ),
@@ -140,6 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
                     height: 60.h,
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -156,24 +204,47 @@ class _ChatScreenState extends State<ChatScreen> {
                                   hintText: "Type a Message ",
                                   hintStyle: TextStyle(color: Colors.white),
                                   border: InputBorder.none),
+                              onChanged: (val) {
+                                (val.length > 0 && val.trim() != "")
+                                    ? setWriting(true)
+                                    : setWriting(false);
+                              },
                             ),
                           ),
                         ),
-                        SizedBox(
-                          width: 20.w,
-                        ),
-                        IconButton(
-                            icon: Icon(
-                              Icons.send,
-                              color: Color(0xffe3e5e2),
-                            ),
-                            onPressed: () {
-                              sendMessage();
-                              Timer(Duration(milliseconds: 300), () {
-                                _controller.jumpTo(
-                                    _controller.position.maxScrollExtent);
-                              });
-                            })
+                        isWritting
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.send,
+                                  color: Color(0xffe3e5e2),
+                                  size: 25.0,
+                                ),
+                                onPressed: () {
+                                  sendMessage();
+                                  Timer(Duration(milliseconds: 300), () {
+                                    _listcontroller.jumpTo(_listcontroller
+                                        .position.maxScrollExtent);
+                                  });
+                                })
+                            : Container(),
+                        isWritting
+                            ? Container()
+                            : IconButton(
+                                icon: Icon(
+                                  Icons.mic,
+                                  color: Colors.white,
+                                ),
+                                onPressed: null),
+                        isWritting
+                            ? Container()
+                            : IconButton(
+                                icon: Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  pickImage(source: ImageSource.camera);
+                                })
                       ],
                     ),
                   ))
@@ -187,7 +258,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _listcontroller.dispose();
     super.dispose();
   }
 }

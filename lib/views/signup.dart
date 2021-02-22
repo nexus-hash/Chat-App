@@ -8,6 +8,7 @@ import 'package:messaging/services/auth.dart';
 import 'package:messaging/views/homepage.dart';
 import 'package:messaging/services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignUp extends StatefulWidget {
   final Function toggle;
@@ -52,29 +53,51 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
 
   signMeUp() {
     if (formkey.currentState.validate()) {
+      Fluttertoast.showToast(
+          msg: "Signing Up...",
+          backgroundColor: Colors.purple,
+          textColor: Colors.white);
       Map<String, String> userMap = {
         "name": _nameEditingController.text,
         "email": _emailEditingController.text
       };
+      try {
+        HelperFunctions.saveUserEmailSharedPreference(
+            _emailEditingController.text);
+        HelperFunctions.saveUserNameSharedPreference(
+            _nameEditingController.text);
 
-      HelperFunctions.saveUserEmailSharedPreference(
-          _emailEditingController.text);
-      HelperFunctions.saveUserNameSharedPreference(_nameEditingController.text);
+        setState(() {
+          isLoading = true;
+        });
 
-      setState(() {
-        isLoading = true;
-      });
+        authMethods
+            .signUpWithEmailAndPassword(
+                _emailEditingController.text, _passwordEditingController.text)
+            .then((value) {
+          print("$value");
+        });
 
-      authMethods
-          .signUpWithEmailAndPassword(
-              _emailEditingController.text, _passwordEditingController.text)
-          .then((value) {
-        print("$value");
-      });
-
-      databaseMethods.uploadUserInfo(userMap);
-      HelperFunctions.saveUserLoggedInSharedPreference(true);
-
+        databaseMethods.uploadUserInfo(userMap);
+        HelperFunctions.saveUserLoggedInSharedPreference(true);
+      } catch (e) {
+        print(e);
+        Fluttertoast.showToast(
+            msg: "Signing Up Failed",
+            backgroundColor: Colors.purple,
+            textColor: Colors.white);
+        Fluttertoast.showToast(
+            msg: "Check Connection",
+            backgroundColor: Colors.purple,
+            textColor: Colors.white);
+        setState(() {
+          isLoading = false;
+        });
+      }
+      Fluttertoast.showToast(
+          msg: "Signing Up Sucessful",
+          backgroundColor: Colors.purple,
+          textColor: Colors.white);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
         return HomePage();
       }));
