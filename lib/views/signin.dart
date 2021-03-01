@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:messaging/colors/color.dart';
+import 'package:messaging/helper/Logo.dart';
 import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/services/database.dart';
@@ -89,6 +90,7 @@ class _SignInState extends State<SignIn> {
               ),
             )
           : Scaffold(
+            resizeToAvoidBottomInset: false,
               backgroundColor: color.background,
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -96,10 +98,10 @@ class _SignInState extends State<SignIn> {
                 children: <Widget>[
                   Spacer(),
                   Container(
-                    height: 0.09.sh,
-                    width: 0.5.sw,
+
                     
-                  child: Image.asset("assets/images/Gibber.png",fit: BoxFit.fill,)),
+                  child: AppLogo()
+                  ),
                   Spacer(),
                   Text("Sign In",style: TextStyle(color: Color(0xff7f7f8e),fontSize: 20),),
                   SizedBox(height: 15.0,),

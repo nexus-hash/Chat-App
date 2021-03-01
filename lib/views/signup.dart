@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:messaging/colors/color.dart';
+import 'package:messaging/helper/Logo.dart';
 import 'package:messaging/helper/helperFunctions.dart';
 import 'package:messaging/services/auth.dart';
 import 'package:messaging/views/homepage.dart';
@@ -108,6 +109,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: color.background,
         body: isLoading
             ? Container(
@@ -122,10 +124,8 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
                 children: <Widget>[
                   Spacer(),
                   Container(
-                    height: 0.09.sh,
-                    width: 0.5.sw,
                     
-                  child: Image.asset("assets/images/Gibber.png",fit: BoxFit.fill,)),
+                  child: AppLogo()),
                   Spacer(),
                   Text("Sign Up",style: TextStyle(color: Color(0xff7f7f8e),fontSize: 20),),
                   SizedBox(height: 15.0,),

@@ -23,12 +23,12 @@ class _HomePageState extends State<HomePage> {
   AuthMethods authMethods = new AuthMethods();
   DatabaseMethods databaseMethods = new DatabaseMethods();
   Stream chatRoomsStream;
+  Stream chatMessageStream;
   bool isLoading = false;
 
   @override
   void initState() {
     getUserInfo();
-
     super.initState();
   }
 
@@ -41,6 +41,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  getLatestMessageForEachChatRoom(String chatRoomId) {
+    databaseMethods.getLatestConversationMessages(chatRoomId).then((val) {
+      if (val != Null) {
+        return val.documents[0].data["message"];
+      }
+    });
+  }
+
   signMeOut() {
     try {
       Fluttertoast.showToast(
@@ -50,7 +58,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isLoading = true;
       });
-      
+
       authMethods.signout();
       HelperFunctions.saveUserLoggedInSharedPreference(false);
       HelperFunctions.saveUserEmailSharedPreference(null);
@@ -84,6 +92,8 @@ class _HomePageState extends State<HomePage> {
                     userName: snapshot.data.documents[index].data["users"],
                     chatRoomId:
                         snapshot.data.documents[index].data["chatroomid"],
+                    //latestMessage: getLatestMessageForEachChatRoom(
+                        //snapshot.data.documents[index].data["chatroomid"]),
                   );
                 },
                 separatorBuilder: (context, index) {
@@ -143,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                       ListTile(
                         onTap: () {
                           signMeOut();
-                          
+
                           Navigator.pushReplacement(context,
                               MaterialPageRoute(builder: (context) {
                             return Authenticate();
@@ -210,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                               }),
                           Spacer(),
                           Text(
-                            "Gibber",
+                            Constants.appName,
                             style: TextStyle(
                                 fontFamily: "Angelina",
                                 color: Colors.white,
@@ -250,7 +260,8 @@ class _HomePageState extends State<HomePage> {
 class ChatRoomsTile extends StatelessWidget {
   final List<dynamic> userName;
   final String chatRoomId;
-  ChatRoomsTile({this.userName, this.chatRoomId});
+  ChatRoomsTile(
+      {this.userName, this.chatRoomId});
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +277,7 @@ class ChatRoomsTile extends StatelessWidget {
       },
       child: Container(
         height: .12.sh,
-        padding: EdgeInsets.only(left: .01.sw),
+        padding: EdgeInsets.only(left: .01.sw, right: 0.01.sw),
         child: Row(
           children: <Widget>[
             Container(
@@ -278,28 +289,43 @@ class ChatRoomsTile extends StatelessWidget {
             SizedBox(
               width: .03.sw,
             ),
-            Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        userName[0] == Constants.myName
-                            ? userName[1]
-                            : userName[0],
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17.ssp),
-                      )),
-                  Container(
-                    child: Text(
-                      "Message demo",
-                      style: TextStyle(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Spacer(),
+                    Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          userName[0] == Constants.myName
+                              ? userName[1]
+                              : userName[0],
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 17.ssp),
+                        )),
+                    SizedBox(
+                      height: 0.019.sh,
                     ),
-                  )
-                ])
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        child: Text(
+                          "latestMessage",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    )
+                  ]),
+            ),
+            Spacer(),
+            Text(
+              "00:00 PM",
+              style: TextStyle(color: Colors.blueGrey),
+            ),
           ],
         ),
       ),

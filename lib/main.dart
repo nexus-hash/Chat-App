@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:messaging/colors/color.dart';
 import 'package:messaging/helper/authenticate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,6 +38,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return ScreenUtilInit(
       designSize: Size(392.72, 738.18),
       allowFontScaling: false,

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:intl/intl.dart';
+
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +11,7 @@ import 'package:messaging/helper/Utils.dart';
 import 'package:messaging/helper/constants.dart';
 import 'package:messaging/services/database.dart';
 import 'package:messaging/views/CallScreen.dart';
+import 'package:messaging/views/ImageView.dart';
 
 class ChatScreen extends StatefulWidget {
   final String secondUser, chatRoomId;
@@ -27,14 +30,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Stream chatMessageStream;
 
   bool isWritting = false;
+  bool isSending = false;
 
   pickImage({@required ImageSource source}) async {
     File selectedImage = await Utils.pickingImage(source: source);
     databaseMethods.uploadImage(
-      image: selectedImage,
-      chatRoomId: widget.chatRoomId,
-      sendby: Constants.myName
-    );
+        image: selectedImage,
+        chatRoomId: widget.chatRoomId,
+        sendby: Constants.myName);
   }
 
   setWriting(val) {
@@ -65,6 +68,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     message: snapshot.data.documents[index].data["Message"],
                     isSendByMe: snapshot.data.documents[index].data["sendby"] ==
                         Constants.myName,
+                    time: new DateFormat('H:mm a').format(
+                        snapshot.data.documents[index].data["time"].toDate()),
+                    photoUrl: snapshot.data.documents[index].data["photoUrl"],
+                    type: snapshot.data.documents[index].data["type"],
+                    index: index,
                   );
                 },
               )
@@ -83,12 +91,16 @@ class _ChatScreenState extends State<ChatScreen> {
       Map<String, dynamic> messageMap = {
         "Message": _messageTextEditingController.text,
         "sendby": Constants.myName,
-        "time": DateTime.now()
+        "time": DateTime.now(),
+        "type": "text",
+        "photoUrl": ""
       };
       databaseMethods.addConversationMessages(widget.chatRoomId, messageMap);
       _messageTextEditingController.text = "";
-      Timer(Duration(milliseconds: 300), () {
-        _listcontroller.jumpTo(_listcontroller.position.maxScrollExtent);
+      setWriting(false);
+      Timer(Duration(milliseconds: 100), () {
+        _listcontroller.animateTo(_listcontroller.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuad);
       });
     }
   }
@@ -183,7 +195,13 @@ class _ChatScreenState extends State<ChatScreen> {
             children: <Widget>[
               Container(
                   padding: EdgeInsets.only(top: 10.h, bottom: 60.h),
-                  child: chatMessageList()),
+                  child: isSending
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: color.gradient2,
+                          ),
+                        )
+                      : chatMessageList()),
               Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
@@ -191,7 +209,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     height: 60.h,
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                            colors: [color.gradient1, color.gradient2])),
+                            colors: [color.gradient1, color.gradient2])
+                            ),
                     child: Row(
                       children: <Widget>[
                         SizedBox(width: 10.w),
@@ -244,6 +263,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                                 onPressed: () {
                                   pickImage(source: ImageSource.camera);
+                                  setState(() {
+                                    isSending = true;
+                                  });
                                 })
                       ],
                     ),
@@ -266,10 +288,20 @@ class _ChatScreenState extends State<ChatScreen> {
 class MessageTiles extends StatelessWidget {
   final String message;
   final bool isSendByMe;
-  MessageTiles({this.message, this.isSendByMe});
+  final String type;
+  final String photoUrl;
+  final int index;
+  MessageTiles(
+      {this.message,
+      this.time,
+      this.type,
+      this.photoUrl,
+      this.isSendByMe,
+      this.index});
   final double width = 1.sw;
   final double height = 1.sh;
   final AppColors color = new AppColors();
+  final String time;
 
   @override
   Widget build(BuildContext context) {
@@ -281,8 +313,15 @@ class MessageTiles extends StatelessWidget {
           alignment: isSendByMe ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
             constraints: BoxConstraints(maxWidth: .7.sw),
-            padding: EdgeInsets.symmetric(
-                horizontal: width * .04, vertical: height * .02),
+            padding:type=="text"? EdgeInsets.only(
+                right: width * .04,
+                left: width * .04,
+                top: height * .02,
+                bottom: height * .017):EdgeInsets.only(
+                right: width * .011,
+                left: width * .011,
+                top: height * .01,
+                bottom: height * .017),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                     colors: isSendByMe
@@ -290,16 +329,59 @@ class MessageTiles extends StatelessWidget {
                         : [Color(0x1AFFFFFF), Color(0x1AFFFFFA)]),
                 borderRadius: isSendByMe
                     ? BorderRadius.only(
-                        topLeft: Radius.circular(50.0),
-                        bottomLeft: Radius.circular(50.0),
-                        topRight: Radius.circular(50.0))
+                        topLeft: Radius.circular(20.0),
+                        bottomLeft: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0))
                     : BorderRadius.only(
-                        topLeft: Radius.circular(50.0),
-                        topRight: Radius.circular(50.0),
-                        bottomRight: Radius.circular(50.0))),
-            child: Text(
-              message,
-              style: TextStyle(color: Colors.white),
+                        bottomLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0))),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                type == "text"
+                    ? Text(
+                        message + "      ",
+                        style: TextStyle(color: Colors.white),
+                      )
+                    : InkWell(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return ImageView(
+                              url: photoUrl,
+                              index: index
+                            );
+                          }));
+                        },
+                        child: Hero(
+                          tag: 'imageHero_$index',
+                          child: ClipRRect(
+                            borderRadius: isSendByMe
+                    ? BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        bottomLeft: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0))
+                    : BorderRadius.only(
+                        bottomLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0)),
+                              child: Image.network(
+                            photoUrl,
+                            fit: BoxFit.fill,
+                          )
+                          ),
+                        )
+                        ),
+                SizedBox(
+                  height: 4.0,
+                ),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey, fontSize: 8),
+                ),
+              ],
             ),
           ),
         ),

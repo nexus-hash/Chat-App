@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messaging/services/auth.dart';
+import 'package:messaging/services/methods.dart';
 
 class DatabaseMethods {
   AuthMethods _authMethods = new AuthMethods();
+  FirebaseMethods _firebaseMethods = new FirebaseMethods();
 
   getUserByUsername(String username) async {
     return await Firestore.instance
@@ -55,6 +57,16 @@ class DatabaseMethods {
         .snapshots();
   }
 
+  getLatestConversationMessages(String chatRoomId) async {
+    Stream chat = await Firestore.instance
+        .collection("ChatRoom")
+        .document(chatRoomId)
+        .collection("chats")
+        .orderBy("time", descending: false)
+        .snapshots();
+    return chat;
+  }
+
   getChatRooms(String userName) async {
     return await Firestore.instance
         .collection("ChatRoom")
@@ -66,6 +78,6 @@ class DatabaseMethods {
       {@required File image,
       @required String sendby,
       @required String chatRoomId}) {
-    _authMethods.uploadImage(image, sendby, chatRoomId);
+    _firebaseMethods.uploadImage(image, sendby, chatRoomId);
   }
 }
